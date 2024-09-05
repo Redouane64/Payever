@@ -1,0 +1,11 @@
+{
+  "name": "payever",
+  "version": "1.0.0",
+  "keywords": [],
+  "author": "Redhouane Sobaihi",
+  "license": "ISC",
+  "workspaces": [
+    "packages/invoice-service",
+    "packages/mail-service"
+  ]
+}
