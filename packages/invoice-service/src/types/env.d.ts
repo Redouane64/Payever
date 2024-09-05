@@ -6,5 +6,9 @@ declare namespace NodeJS {
 
     // database config
     DATABASE_MONGO_URI: string;
+
+    // rabbitmq config
+    RMQ_URL: string;
+    REPORTING_QUEUE_NAME: string;
   }
 }
