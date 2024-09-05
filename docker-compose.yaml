@@ -10,3 +10,15 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: payever
     ports:
       - 27017:27017
+
+  rabbitmq:
+    container_name: payever-rabbitmq
+    image: rabbitmq:3.10.7-management
+    hostname: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=payever
+      - RABBITMQ_DEFAULT_PASS=payever
+    restart: always
+    ports:
+      - 15672:15672
+      - 5672:5672
