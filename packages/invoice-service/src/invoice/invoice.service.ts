@@ -1,22 +1,56 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateInvoiceDto, InvoiceFilter } from './dtos';
-import { Invoice } from './interfaces';
-import * as crypto from 'node:crypto';
+import { Model, RootFilterQuery } from 'mongoose';
+import { Invoice } from './schemas/invoice.schema';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class InvoiceService {
-  private readonly store: Invoice[] = [];
+  constructor(
+    @InjectModel(Invoice.name)
+    private readonly invoices: Model<Invoice>,
+  ) {}
 
-  create(data: CreateInvoiceDto) {
-    const len = this.store.push({ ...data, id: crypto.randomUUID() });
-    return this.store[len - 1];
+  async create(data: CreateInvoiceDto) {
+    const doc = await this.invoices.create(data);
+    const invoice = doc.toJSON();
+    delete invoice['__v'];
+    return invoice;
   }
 
-  findAll(filter: InvoiceFilter) {
-    return this.store;
+  async findAll(filter: InvoiceFilter) {
+    const findOptions: RootFilterQuery<Invoice> = {
+      date: {
+        $lte: new Date(),
+      },
+    };
+
+    if (filter.from) {
+      findOptions.date.$gte = filter.from;
+    }
+    if (filter.to) {
+      findOptions.date.$lte = filter.to;
+    }
+
+    const invoices = await this.invoices
+      .find(
+        {
+          ...findOptions,
+        },
+        { __v: 0 },
+        { lean: true },
+      )
+      .exec();
+    return invoices;
   }
 
-  findInvoiceById(id: string) {
-    return this.store.find((i) => i.id === id);
+  async findInvoiceById(id: string) {
+    const document = await this.invoices.findById(id, { __v: 0 }).exec();
+
+    if (!document) {
+      throw new NotFoundException('Invoice not found');
+    }
+
+    return document;
   }
 }

@@ -1,10 +1,14 @@
-export interface InvoiceItem {
+import { IsNotEmpty, IsPositive } from 'class-validator';
+
+export class InvoiceItem {
+  @IsNotEmpty()
   sku: string;
-  qty: number;
+
+  @IsPositive()
+  qt: number;
 }
 
-export interface Invoice {
-  id: string;
+export interface IInvoice {
   customer: string;
   amount: number;
   reference: string;

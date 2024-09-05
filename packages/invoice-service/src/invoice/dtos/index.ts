@@ -1,14 +1,40 @@
-import { Invoice, InvoiceItem } from '../interfaces';
+import {
+  IsArray,
+  IsDate,
+  IsDateString,
+  IsNotEmpty,
+  IsOptional,
+  IsPositive,
+  ValidateNested,
+} from 'class-validator';
+import { IInvoice, InvoiceItem } from '../interfaces';
+import { Type } from 'class-transformer';
 
-export class CreateInvoiceDto implements Omit<Invoice, 'id'> {
+export class CreateInvoiceDto implements Omit<IInvoice, 'id'> {
+  @IsNotEmpty()
   customer: string;
+
+  @IsPositive()
   amount: number;
+
+  @IsNotEmpty()
   reference: string;
+
+  @IsDateString()
   date: Date;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => InvoiceItem)
   items: InvoiceItem[];
 }
 
-export interface InvoiceFilter {
-  from: Date;
-  to: Date;
+export class InvoiceFilter {
+  @IsOptional()
+  @IsDateString()
+  from?: Date;
+
+  @IsOptional()
+  @IsDateString()
+  to?: Date;
 }
