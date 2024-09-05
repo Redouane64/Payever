@@ -3,5 +3,8 @@ declare namespace NodeJS {
     // app config
     NODE_ENV: 'development' | 'test' | 'production';
     PORT: string;
+
+    // database config
+    DATABASE_MONGO_URI: string;
   }
 }
