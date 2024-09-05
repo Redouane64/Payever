@@ -5,6 +5,7 @@
   "author": "Redhouane Sobaihi",
   "license": "ISC",
   "workspaces": [
-    "packages/*"
+    "packages/invoice-service",
+    "packages/mail-service"
   ]
 }
