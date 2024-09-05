@@ -17,6 +17,7 @@ export class MongooseDatabaseFactory implements MongooseOptionsFactory {
     const options: MongooseModuleOptions = {
       appName: 'invoice-service',
       uri: databaseConfig.uri,
+      dbName: 'invoices',
     };
 
     return options;
