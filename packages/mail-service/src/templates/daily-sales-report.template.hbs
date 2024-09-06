@@ -12,12 +12,18 @@
       </tr>
     </thead>
     <tbody>
-      {{#each soldItems}}
+      {{#if soldItems.length}}
+        {{#each soldItems}}
+        <tr>
+          <td style="border: 1px solid black; padding: 8px;">{{sku}}</td>
+          <td style="border: 1px solid black; padding: 8px;">{{qt}}</td>
+        </tr>
+        {{/each}}
+      {{else}}
       <tr>
-        <td style="border: 1px solid black; padding: 8px;">{{sku}}</td>
-        <td style="border: 1px solid black; padding: 8px;">{{qt}}</td>
+        <td colspan="2" style="border: 1px solid black; padding: 8px;">No Items sold</td>
       </tr>
-      {{/each}}
+      {{/if}}
     </tbody>
   </table>
 
