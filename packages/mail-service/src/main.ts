@@ -14,7 +14,7 @@ async function bootstrap() {
     transport: Transport.RMQ,
     options: {
       urls: [rmqConfig.url],
-      noAck: true,
+      noAck: false,
       queue: rmqConfig.reportingQueueName,
       prefetchCount: 100,
       queueOptions: {

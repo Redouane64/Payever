@@ -10,5 +10,14 @@ declare namespace NodeJS {
     // rabbitmq config
     RMQ_URL: string;
     REPORTING_QUEUE_NAME: string;
+
+    // smtp config
+    SMTP_HOST: string;
+    SMTP_PORT: string;
+    SMTP_USERNAME: string;
+    SMTP_PASSWORD: string;
+
+    // report config
+    REPORT_TO: string;
   }
 }

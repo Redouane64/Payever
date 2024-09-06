@@ -1,9 +1,11 @@
 import { registerAs } from '@nestjs/config';
 
 export interface IAppConfig {
-  envMode: string;
+  nodeEnv: string;
+  reportTo: string;
 }
 
 export default registerAs<IAppConfig>('app', () => ({
-  envMode: process.env.NODE_ENV || 'development',
+  nodeEnv: process.env.NODE_ENV || 'development',
+  reportTo: process.env.REPORT_TO,
 }));
