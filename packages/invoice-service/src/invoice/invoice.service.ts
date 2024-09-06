@@ -3,6 +3,7 @@ import { CreateInvoiceDto, InvoiceFilter } from './dtos';
 import { Model, RootFilterQuery } from 'mongoose';
 import { Invoice } from './schemas/invoice.schema';
 import { InjectModel } from '@nestjs/mongoose';
+import { DailySalesReport } from '../reporting/interfaces';
 
 @Injectable()
 export class InvoiceService {
@@ -52,5 +53,74 @@ export class InvoiceService {
     }
 
     return document;
+  }
+
+  async getDailyReport(): Promise<DailySalesReport> {
+    const to = new Date();
+    const from = new Date(to.getTime() - 24 * 3600 * 1000);
+
+    const soldItems = await this.invoices
+      .aggregate<{ sku: string; qt: number }>([
+        {
+          $match: {
+            date: {
+              $gte: from,
+              $lte: to,
+            },
+          },
+        },
+        {
+          // Unwind the items array to separate each item
+          $unwind: '$items',
+        },
+        {
+          // Group by SKU and calculate total qt per SKU
+          $group: {
+            _id: '$items.sku',
+            qt: { $sum: '$items.qt' },
+          },
+        },
+        {
+          // Project final output structure
+          $project: {
+            _id: 0,
+            sku: '$_id',
+            qt: 1,
+          },
+        },
+      ])
+      .exec();
+
+    const [summary = { totalSales: 0 }] = await this.invoices
+      .aggregate<{ totalSales: number }>([
+        {
+          $match: {
+            date: {
+              $gte: from,
+              $lte: to,
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalSales: {
+              $sum: '$amount',
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+          },
+        },
+      ])
+      .exec();
+
+    return {
+      date: new Date().toDateString(),
+      soldItems,
+      totalSales: summary.totalSales,
+    };
   }
 }

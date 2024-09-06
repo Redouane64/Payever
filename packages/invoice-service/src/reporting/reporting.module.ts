@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ReportingService } from './reporting.service';
-import { MongooseModule } from '@nestjs/mongoose';
-import { Invoice, InvoiceSchema } from '../invoice/schemas/invoice.schema';
 import { ClientsModule } from '@nestjs/microservices';
 import { MAIL_CLIENT_NAME, RmqClientFactory } from './rmq-client';
+import { InvoiceModule } from '../invoice/invoice.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Invoice.name, schema: InvoiceSchema }]),
+    InvoiceModule,
     ClientsModule.registerAsync({
       clients: [
         {

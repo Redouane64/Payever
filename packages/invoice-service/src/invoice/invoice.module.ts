@@ -10,5 +10,6 @@ import { Invoice, InvoiceSchema } from './schemas/invoice.schema';
   ],
   controllers: [InvoiceController],
   providers: [InvoiceService],
+  exports: [InvoiceService],
 })
 export class InvoiceModule {}
