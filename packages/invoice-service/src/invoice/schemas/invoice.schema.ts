@@ -1,11 +1,18 @@
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IInvoice, InvoiceItem } from '../interfaces';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
 export type InvoiceDocument = HydratedDocument<Invoice>;
 
+export class InvoiceItem {
+  @Prop({ type: String, required: true })
+  sku: string;
+
+  @Prop({ type: Number, required: true })
+  qt: number;
+}
+
 @Schema()
-export class Invoice implements IInvoice {
+export class Invoice {
   @Prop({
     required: true,
   })
@@ -28,7 +35,7 @@ export class Invoice implements IInvoice {
   date: Date;
 
   @Prop({
-    type: [raw({ qt: { type: Number }, sku: { type: String } })],
+    type: [{ type: InvoiceItem }],
     required: true,
     _id: false,
   })

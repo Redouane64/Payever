@@ -13,10 +13,17 @@ export class InvoiceService {
   ) {}
 
   async create(data: CreateInvoiceDto) {
-    const doc = await this.invoices.create(data);
-    const invoice = doc.toJSON();
-    delete invoice['__v'];
-    return invoice;
+    const document = await this.invoices.create(data);
+    return document.toJSON({
+      getters: false,
+      versionKey: false,
+      flattenObjectIds: true,
+      virtuals: true,
+      transform: (doc, ret) => {
+        delete ret._id;
+        return ret;
+      },
+    });
   }
 
   async findAll(filter: InvoiceFilter) {
@@ -49,7 +56,7 @@ export class InvoiceService {
     const document = await this.invoices.findById(id, { __v: 0 }).exec();
 
     if (!document) {
-      throw new NotFoundException('Invoice not found');
+      throw new NotFoundException('invoice_not_found');
     }
 
     return document;

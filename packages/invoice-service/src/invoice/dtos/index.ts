@@ -6,10 +6,10 @@ import {
   IsPositive,
   ValidateNested,
 } from 'class-validator';
-import { IInvoice, InvoiceItem } from '../interfaces';
+import { Invoice, InvoiceItem } from '../schemas/invoice.schema';
 import { Type } from 'class-transformer';
 
-export class CreateInvoiceDto implements Omit<IInvoice, 'id'> {
+export class CreateInvoiceDto implements Omit<Invoice, '_id'> {
   @IsNotEmpty()
   customer: string;
 
@@ -24,8 +24,16 @@ export class CreateInvoiceDto implements Omit<IInvoice, 'id'> {
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => InvoiceItem)
-  items: InvoiceItem[];
+  @Type(() => CreateInvoiceItem)
+  items: CreateInvoiceItem[];
+}
+
+export class CreateInvoiceItem extends InvoiceItem {
+  @IsNotEmpty()
+  sku: string;
+
+  @IsPositive()
+  qt: number;
 }
 
 export class InvoiceFilter {
