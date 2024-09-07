@@ -46,10 +46,20 @@ export class InvoiceService {
           ...findOptions,
         },
         { __v: 0 },
-        { lean: true },
       )
       .exec();
-    return invoices;
+    return invoices.map((document) =>
+      document.toJSON({
+        getters: false,
+        versionKey: false,
+        flattenObjectIds: true,
+        virtuals: true,
+        transform: (doc, ret) => {
+          delete ret._id;
+          return ret;
+        },
+      }),
+    );
   }
 
   async findInvoiceById(id: string) {
@@ -59,7 +69,16 @@ export class InvoiceService {
       throw new NotFoundException('invoice_not_found');
     }
 
-    return document;
+    return document.toJSON({
+      getters: false,
+      versionKey: false,
+      flattenObjectIds: true,
+      virtuals: true,
+      transform: (doc, ret) => {
+        delete ret._id;
+        return ret;
+      },
+    });
   }
 
   async getDailyReport(): Promise<DailySalesReport> {
