@@ -1,9 +1,24 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
-import { DailySalesReport } from './templates/daily-sales-report.interface';
+import DailySalesMailTemplate, {
+  DailySalesReport,
+} from './templates/daily-sales-report.interface';
 import { RmqContext } from '@nestjs/microservices';
 import { MailingService } from './mailing/mailing.service';
 import { ConfigService } from '@nestjs/config';
+import { faker } from '@faker-js/faker';
+
+jest.mock('./templates/daily-sales-report.interface', () => {
+  const originalModule = jest.requireActual(
+    './templates/daily-sales-report.interface',
+  );
+
+  return {
+    __esModule: true,
+    ...originalModule,
+    default: jest.fn(),
+  };
+});
 
 describe('InvoiceController', () => {
   let controller: AppController;
@@ -53,11 +68,12 @@ describe('InvoiceController', () => {
     jest.spyOn(ctx, 'getChannelRef').mockImplementationOnce(() => channelRef);
     jest.spyOn(ctx, 'getMessage').mockImplementationOnce(() => message);
     jest.spyOn(fakeConfigService, 'get').mockImplementation(() => ({
-      reportTo: 'foo@bar.com',
+      reportTo: faker.internet.email(),
     }));
 
     await controller.onSalesReport(message, ctx);
 
+    expect(DailySalesMailTemplate).toHaveBeenCalled();
     expect(ctx.getChannelRef).toHaveBeenCalledTimes(1);
     expect(ctx.getMessage).toHaveBeenCalledTimes(1);
     expect(channelRef.ack).toHaveBeenCalledWith(message);

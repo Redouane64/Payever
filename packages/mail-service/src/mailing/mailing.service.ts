@@ -8,11 +8,11 @@ export class MailingService {
     private readonly mailerService: NodeMailer,
   ) {}
 
-  async send(options: { to: string; subject: string; body: string }) {
+  async send(options: { to: string; subject: string; html: string }) {
     await this.mailerService.sendMail({
       to: options.to,
       subject: options.subject,
-      html: options.body,
+      html: options.html,
       encoding: 'utf-8',
     });
   }

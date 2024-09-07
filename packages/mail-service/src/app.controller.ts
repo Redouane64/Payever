@@ -38,7 +38,7 @@ export class AppController {
     await this.mailingService.send({
       to: appConfig.reportTo,
       subject: 'Daily Sales Report',
-      body: html,
+      html,
     });
 
     const channel = ctx.getChannelRef();
