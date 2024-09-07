@@ -1,14 +1,46 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { InvoiceService } from './invoice.service';
-import { Invoice } from './interfaces';
-import { CreateInvoiceDto, InvoiceFilter } from './dtos';
+import { InvoiceFilter } from './dtos';
+import { Invoice } from './schemas/invoice.schema';
+import { getModelToken } from '@nestjs/mongoose';
+import { faker } from '@faker-js/faker';
 
 describe('InvoiceService', () => {
   let service: InvoiceService;
 
+  const invoiceModel = {
+    create: jest.fn((args) => ({
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      toJSON: jest.fn((_) => args),
+    })),
+    find: jest.fn(() => invoiceModel),
+    findById: jest.fn(() => invoiceModel),
+    aggregate: jest.fn(() => invoiceModel),
+    exec: jest.fn(),
+  };
+
+  const fakeInvoice = {
+    customer: faker.person.fullName(),
+    date: faker.date.past(),
+    amount: faker.number.int({ min: 100, max: 1_000 }),
+    reference: faker.string.alphanumeric({ length: 6 }),
+    items: [
+      {
+        sku: faker.string.alphanumeric({ length: 6 }),
+        qt: faker.number.int({ min: 1 }),
+      },
+    ],
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [InvoiceService],
+      providers: [
+        InvoiceService,
+        {
+          provide: getModelToken(Invoice.name),
+          useValue: invoiceModel,
+        },
+      ],
     }).compile();
 
     service = module.get<InvoiceService>(InvoiceService);
@@ -19,51 +51,67 @@ describe('InvoiceService', () => {
   });
 
   describe('createInvoice', () => {
-    it('should create invoice', () => {
-      const inputInvoice: CreateInvoiceDto = {
-        customer: 'John Doe',
-        date: new Date(),
-        reference: 'INV-100',
-        amount: 20,
-        items: [{ sku: 'PR101', qty: 1 }],
-      };
-      const expectedInvoice = inputInvoice;
+    it('should create invoice', async () => {
+      const inputInvoice = fakeInvoice;
 
-      const createdInvoice = service.create(inputInvoice);
+      const expectedInvoice = inputInvoice;
+      const createdInvoice = await service.create(inputInvoice);
 
       expect(createdInvoice).toBe(expectedInvoice);
+      expect(invoiceModel.create).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('findAll', () => {
-    it('should find all invoices', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should find all invoices', async () => {
+      jest.spyOn(invoiceModel, 'exec').mockResolvedValueOnce([fakeInvoice]);
+
       const inputFilter: InvoiceFilter = {
         from: new Date(new Date().getTime() - 3_600_000 * 24),
         to: new Date(),
       };
-      const expectedInvoices: Invoice[] = [];
+      const expectedInvoices = [fakeInvoice];
 
-      const invoices = service.findAll(inputFilter);
+      const invoices = await service.findAll(inputFilter);
 
       expect(invoices).toStrictEqual(expectedInvoices);
     });
   });
 
   describe('findById', () => {
-    it('should find invoice', () => {
-      const inputId = '';
-      const expectedInvoice: Invoice = {
-        id: '',
-        customer: 'John Doe',
-        date: new Date(),
-        reference: 'INV-100',
-        amount: 20,
-        items: [{ sku: 'PR101', qty: 1 }],
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should find invoice', async () => {
+      const inputId = faker.database.mongodbObjectId();
+      const expectedInvoice = {
+        id: inputId,
+        ...fakeInvoice,
       };
+      jest
+        .spyOn(invoiceModel, 'exec')
+        .mockImplementationOnce(() => expectedInvoice);
 
-      const invoices = service.findInvoiceById(inputId);
+      const invoice = await service.findInvoiceById(inputId);
+      expect(invoice).toStrictEqual(expectedInvoice);
+      expect(invoiceModel.findById).toHaveBeenCalledTimes(1);
+      expect(invoiceModel.exec).toHaveBeenCalledTimes(1);
+    });
 
-      expect(invoices).toBe(expectedInvoice);
+    it('should throw invoice_not_found error', async () => {
+      const inputId = faker.database.mongodbObjectId();
+      jest.spyOn(invoiceModel, 'exec').mockImplementationOnce(() => null);
+
+      const call = service.findInvoiceById(inputId);
+
+      expect(call).rejects.toThrow('invoice_not_found');
+      expect(invoiceModel.findById).toHaveBeenCalledTimes(1);
+      expect(invoiceModel.exec).toHaveBeenCalledTimes(1);
     });
   });
 });
