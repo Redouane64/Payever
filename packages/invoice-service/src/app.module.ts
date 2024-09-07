@@ -4,6 +4,7 @@ import { InvoiceModule } from './invoice/invoice.module';
 import { DatabaseModule } from './database/database.module';
 import { ReportingModule } from './reporting/reporting.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     DatabaseModule,
     ReportingModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule {}
