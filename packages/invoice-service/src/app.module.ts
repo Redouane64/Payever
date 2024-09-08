@@ -5,9 +5,12 @@ import { DatabaseModule } from './database/database.module';
 import { ReportingModule } from './reporting/reporting.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
+import { LoggerModule } from 'nestjs-pino';
+import { loggerModuleOptions } from './config/logger';
 
 @Module({
   imports: [
+    LoggerModule.forRootAsync(loggerModuleOptions),
     ConfigModule,
     ScheduleModule.forRoot(),
     InvoiceModule,
